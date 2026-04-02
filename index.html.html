@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>더불어민주당 제9회 지방선거 후보자 공천 현황판</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+:root {  --bg-deep: #06090F;  --bg-card: #0D1321;  --border: #1B2640;  --border-light: #243352;  --text-primary: #E8ECF4;  --text-secondary: #7B8BA8;  --text-dim: #4A5A78;  --accent-blue: #4A90FF;  --accent-cyan: #36D6E7;  --accent-violet: #8B6CFF;  --accent-emerald: #34D399;  --accent-amber: #FBBF24;  --accent-rose: #FB7185;  --font-display: 'Pretendard', sans-serif;}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg-deep); color: var(--text-primary); font-family: var(--font-display); min-height: 100vh; overflow-x: hidden; }
+.dashboard { position: relative; max-width: 1400px; margin: 0 auto; padding: 32px 28px; }
+
+/* Header */
+.header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-mark { width: 5px; height: 48px; border-radius: 3px; background: linear-gradient(180deg, var(--accent-blue), var(--accent-violet)); }
+.header h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+.header .subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.refresh-info { display: flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 11px; color: var(--text-dim); }
+.refresh-info .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald); animation: pulse 2s infinite; }
+.refresh-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); padding: 4px 8px; cursor: pointer; transition: all 0.2s; margin-left: 4px;}
+.refresh-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+/* Schedule Section */
+.schedule-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+.schedule-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; position: relative; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-blue); border-radius: 16px 16px 0 0; }
+.kpi-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-bottom: 10px; }
+.kpi-value { font-size: 28px; font-weight: 800; line-height: 1; color: var(--text-primary); }
+
+/* Layout & Charts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.card-title .mark { width: 4px; height: 18px; border-radius: 2px; }
+
+.bar-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+.bar-region { width: 44px; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.bar-track { flex: 1; height: 18px; background: rgba(255,255,255,0.03); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s; }
+.bar-rate { font-size: 13px; font-weight: 700; width: 52px; text-align: right; }
+
+.type-item { background: rgba(255,255,255,0.02); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
+.type-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+.progress-track { background: rgba(255,255,255,0.04); height: 7px; border-radius: 4px; flex: 1; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.8s; }
+
+/* Region Buttons */
+.region-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-bottom: 16px; }
+.btn-region { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 12px 0; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+.btn-region:hover { border-color: var(--accent-blue); color: var(--text-primary); }
+.btn-region.active { background: rgba(74,144,255,0.15); border-color: var(--accent-blue); color: var(--accent-blue); }
+
+/* Details & Sub-Tabs */
+.detail-panel { animation: slideIn 0.3s ease; margin-bottom: 40px; }
+.detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.detail-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; color: var(--text-secondary); cursor: pointer; font-size: 12px; }
+
+.section-title { font-size: 16px; color: var(--text-primary); margin: 36px 0 16px 0; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.section-title span { color: var(--text-secondary); font-size: 13px; font-weight: 400; }
+
+.sub-tab-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
+.sub-tab-btn { padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.sub-tab-btn:hover:not(:disabled) { border-color: var(--accent-blue); color: var(--text-primary); }
+.sub-tab-btn.active { background: rgba(74,144,255,0.15); border-color: var(--accent-blue); color: var(--accent-blue); }
+.sub-tab-btn:disabled { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+
+.detail-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.detail-stat-box { background: rgba(255,255,255,0.02); padding: 16px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+.detail-stat-box.disabled { opacity: 0.4; }
+
+.table-wrapper { overflow-x: auto; margin-bottom: 16px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--border); }
+.data-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+.data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; white-space: nowrap; }
+.data-table th { background: rgba(255,255,255,0.03); color: var(--text-secondary); font-weight: 600; position: sticky; top: 0; }
+.empty-msg { padding: 40px; text-align: center; color: var(--text-dim); font-size: 14px; }
+
+@media (max-width: 1000px) { .region-grid { grid-template-columns: repeat(6, 1fr); } .schedule-wrapper { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } .region-grid { grid-template-columns: repeat(4, 1fr); } }
+@keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+</style>
+</head>
+<body>
+<div class="dashboard" id="app"></div>
+
+<script>
+// ════════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbzblguXqWIE7pohVkqyIF6_ffIm5aJS5qhFD85GPU3e_i0i7ePTa3n43ZMMKnS74fThvg/exec";
+// ════════════════════════════════════════════════
+
+const REGIONS = ['중앙당','서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
+const TYPE_COLORS = ['#4A90FF','#8B6CFF','#E76FD3','#FBBF24','#34D399','#36D6E7'];
+const TYPE_LABELS = ['광역단체장','기초단체장','광역(지역구)','광역(비례)','기초(지역구)','기초(비례)'];
+const LOCAL_TABS = ['기초단체장', '광역(지역구)', '광역(비례)', '기초(지역구)', '기초(비례)'];
+const DISABLED_FOR_SEJONG_JEJU = ['기초단체장', '기초(지역구)', '기초(비례)'];
+
+let STATS_DATA = [];
+let RAW_SHEETS = {};
+let selectedRegion = null;
+
+let activePrimTab = '기초단체장';
+let activeConfTab = '기초단체장';
+
+// 🔥 상단 그래프 스위치 상태 저장용 변수
+let activeChart1Tab = 'prim'; // 'prim'(심사) or 'conf'(확정)
+let activeChart2Tab = 'prim';
+
+async function fetchFromAPI() {
+  try {
+    const res = await fetch(API_URL, { redirect: 'follow' });
+    if (res.ok) return await res.json();
+  } catch(e) {}
+  
+  return new Promise((resolve, reject) => {
+    const callbackName = '_cb_' + Date.now();
+    const script = document.createElement('script');
+    window[callbackName] = data => { delete window[callbackName]; script.remove(); resolve(data); };
+    script.src = API_URL + (API_URL.includes('?') ? '&' : '?') + 'callback=' + callbackName;
+    script.onerror = () => reject(new Error('JSONP 실패'));
+    document.head.appendChild(script);
+  });
+}
+
+function parseStatsData(statsJson) {
+  const getNum = val => Number(String(val).replace(/[^0-9.-]+/g,"")) || 0;
+  return statsJson.filter(row => row['시도'] && row['시도'] !== '총합').map(row => {
+    const region = row['시도'];
+    const total_cand = getNum(row['경선_종합_후보']);
+    const total_done = getNum(row['경선_종합_구']);
+    const total_all = getNum(row['경선_종합_총']);
+    const total_rate = total_all > 0 ? (total_done / total_all * 100) : 0;
+    
+    const conf_total_done = getNum(row['확정_종합_구확정'] || row['확정_종합_인원']);
+    const conf_total_all = getNum(row['확정_종합_총구'] || row['확정_종합_총인원']);
+    const conf_total_rate = conf_total_all > 0 ? (conf_total_done / conf_total_all * 100) : 0;
+
+    const types = [
+      { label: '광역단체장', color: '#4A90FF', done: getNum(row['경선_광역장_구']), all: getNum(row['경선_광역장_총']), conf_done: getNum(row['확정_광역장_인원']), conf_all: getNum(row['확정_광역장_총']) },
+      { label: '기초단체장', color: '#8B6CFF', done: getNum(row['경선_기초장_구']), all: getNum(row['경선_기초장_총']), conf_done: getNum(row['확정_기초장_인원']), conf_all: getNum(row['확정_기초장_총']) },
+      { label: '광역(지역구)', color: '#E76FD3', done: getNum(row['경선_광역지역_구']), all: getNum(row['경선_광역지역_총']), conf_done: getNum(row['확정_광역지역_인원']), conf_all: getNum(row['확정_광역지역_총']) },
+      { label: '광역(비례)', color: '#FBBF24', done: getNum(row['경선_광역비례_구']), all: getNum(row['경선_광역비례_총']), conf_done: getNum(row['확정_광역비례_인원']), conf_all: getNum(row['확정_광역비례_총']) },
+      { label: '기초(지역구)', color: '#34D399', done: getNum(row['경선_기초지역_구']), all: getNum(row['경선_기초지역_총']), conf_done: getNum(row['확정_기초지역_인원']), conf_all: getNum(row['확정_기초지역_총']) },
+      { label: '기초(비례)', color: '#36D6E7', done: getNum(row['경선_기초비례_구']), all: getNum(row['경선_기초비례_총']), conf_done: getNum(row['확정_기초비례_인원']), conf_all: getNum(row['확정_기초비례_총']) }
+    ];
+    return { region, total_cand, total_done, total_all, total_rate, conf_total_done, conf_total_all, conf_total_rate, types };
+  });
+}
+
+function standardizeHeader(h) {
+  if(!h) return '';
+  h = h.replace(/\s/g, '');
+  if(h.includes('시도')) return '시도';
+  if(h.includes('구분')) return '구분';
+  if(h.includes('선거구')) return '선거구';
+  if(h.includes('심사')) return '심사결과';
+  if(h.includes('후보자')) return '후보자';
+  if(h.includes('생년월일')) return '생년월일';
+  if(h.includes('성별')) return '성별';
+  if(h.includes('경력')) return '대표경력';
+  if(h.includes('사유')) return '추천사유';
+  if(h.includes('상무위') || h.includes('최고위') || h.includes('의결')) return '의결';
+  if(h.includes('비고')) return '비고';
+  return h;
+}
+
+// 🛡️ 절대 좌표 데이터 추출기 (수정 금지 - 시멘트 도포)
+function getTableDataFixedCoords(data2D, type) {
+  if(!data2D || data2D.length < 3) return [];
+  
+  let result = [];
+  let lastValues = {};
+  
+  for(let i=2; i<data2D.length; i++) {
+    if(!data2D[i]) continue;
+    
+    let obj = {};
+    let hasData = false;
+    
+    if (type === 'primary') {
+      let sido = String(data2D[i][1] || '').trim();
+      let gubun = String(data2D[i][2] || '').trim();
+      let district = String(data2D[i][3] || '').trim();
+      
+      if(sido.includes('시도') && gubun.includes('구분')) continue; 
+      if((sido+gubun+district).includes('합계') || (sido+gubun+district).includes('총계')) break;
+      
+      if(sido !== '') lastValues['시도'] = sido; else sido = lastValues['시도'] || '';
+      if(gubun !== '') lastValues['구분'] = gubun; else gubun = lastValues['구분'] || '';
+      if(district !== '') lastValues['선거구'] = district; else district = lastValues['선거구'] || '';
+      
+      obj['시도'] = sido.replace(/\n/g, ', ');
+      obj['구분'] = gubun.replace(/\n/g, ', ');
+      obj['선거구'] = district.replace(/\n/g, ', ');
+      obj['심사결과'] = String(data2D[i][5] || '').trim().replace(/\n/g, ', ');
+      obj['후보자'] = String(data2D[i][6] || '').trim().replace(/\n/g, ', ');
+      obj['의결'] = String(data2D[i][7] || '').trim().replace(/\n/g, ', ');
+      obj['비고'] = String(data2D[i][8] || '').trim().replace(/\n/g, ', ');
+      
+      if(obj['심사결과'] || obj['후보자'] || obj['의결'] || (obj['비고'] && obj['비고'] !== '-')) hasData = true;
+      
+    } else {
+      let sido = String(data2D[i][11] || '').trim();
+      let gubun = String(data2D[i][12] || '').trim();
+      let district = String(data2D[i][13] || '').trim();
+      
+      if(sido.includes('시도') && gubun.includes('구분')) continue; 
+      if((sido+gubun+district).includes('합계') || (sido+gubun+district).includes('총계')) break;
+      
+      if(sido !== '') lastValues['시도'] = sido; else sido = lastValues['시도'] || '';
+      if(gubun !== '') lastValues['구분'] = gubun; else gubun = lastValues['구분'] || '';
+      if(district !== '') lastValues['선거구'] = district; else district = lastValues['선거구'] || '';
+      
+      obj['시도'] = sido.replace(/\n/g, ', ');
+      obj['구분'] = gubun.replace(/\n/g, ', ');
+      obj['선거구'] = district.replace(/\n/g, ', ');
+      obj['후보자'] = String(data2D[i][16] || '').trim().replace(/\n/g, ', ');
+      obj['생년월일'] = String(data2D[i][17] || '').trim().replace(/\n/g, ', ');
+      obj['성별'] = String(data2D[i][18] || '').trim().replace(/\n/g, ', ');
+      obj['대표경력'] = String(data2D[i][19] || '').trim().replace(/\n/g, ', ');
+      obj['추천사유'] = String(data2D[i][20] || '').trim().replace(/\n/g, ', ');
+      obj['의결'] = String(data2D[i][21] || '').trim().replace(/\n/g, ', ');
+      obj['비고'] = String(data2D[i][22] || '').trim().replace(/\n/g, ', ');
+      
+      if(obj['후보자'] || obj['대표경력'] || obj['추천사유'] || (obj['비고'] && obj['비고'] !== '-')) hasData = true;
+    }
+    
+    if(hasData) result.push(obj);
+  }
+  return result;
+}
+
+function getFilterTarget(tabLabel) {
+  if (tabLabel === '기초단체장') return '단체장';
+  if (tabLabel === '광역(지역구)') return '광역';
+  if (tabLabel === '광역(비례)') return '광역비례';
+  if (tabLabel === '기초(지역구)') return '기초';
+  if (tabLabel === '기초(비례)') return '기초비례';
+  return tabLabel.replace(/\s/g, '');
+}
+
+function isExactMatch(row, tabLabel) {
+  let val = (row['구분'] || '').replace(/\s/g, '');
+  let target = getFilterTarget(tabLabel);
+  return val === target;
+}
+
+function isYouth(birthStr) {
+  if (!birthStr || birthStr === '-') return false;
+  const parts = birthStr.replace(/[^\d]/g, '');
+  if (parts.length < 6) return false;
+  const yy = parseInt(parts.substring(0,2));
+  const yyyy = (yy > 30) ? 1900 + yy : 2000 + yy;
+  const mm = parseInt(parts.substring(2,4));
+  const dd = parseInt(parts.substring(4,6));
+  let age = 2026 - yyyy;
+  if (mm > 6 || (mm === 6 && dd > 3)) age--;
+  return age <= 45;
+}
+
+function parseDateStr(str) {
+  if(!str || str==='-') return null;
+  let p = str.replace(/[^\d]/g, '');
+  if(p.length === 6) return new Date(2000+parseInt(p.substring(0,2)), parseInt(p.substring(2,4))-1, parseInt(p.substring(4,6)));
+  if(p.length === 8) return new Date(parseInt(p.substring(0,4)), parseInt(p.substring(4,6))-1, parseInt(p.substring(6,8)));
+  let d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function pct(v) { return Number(v).toFixed(1) + '%'; }
+function statusColor(r) { return r>=80?'var(--accent-emerald)':r>=40?'var(--accent-amber)':r>=10?'var(--accent-blue)':'var(--accent-rose)'; }
+function num(n) { return Number(n).toLocaleString(); }
+
+function renderSchedule() {
+  const raw = RAW_SHEETS['일정(시도당작성)'] || [];
+  if(raw.length < 2) return ''; 
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+
+  let todaysEvents = []; let tomorrowsEvents = [];
+
+  for(let i=1; i<raw.length; i++) {
+    let sido = String(raw[i][1] || '').trim();
+    let gubun = String(raw[i][2] || '').trim();
+    let startStr = String(raw[i][3] || '').trim();
+    let endStr = String(raw[i][4] || '').trim();
+    let content = String(raw[i][5] || '').trim();
+    let note = String(raw[i][6] || '').trim();
+
+    if(!sido && !content) continue;
+
+    let startD = parseDateStr(startStr);
+    let endD = parseDateStr(endStr);
+    
+    let isToday = false; let isTomorrow = false;
+
+    if(startD && endD) {
+      if (today >= startD && today <= endD) isToday = true;
+      if (tomorrow >= startD && tomorrow <= endD) isTomorrow = true;
+    } else if(startD) {
+      if (today.getTime() === startD.getTime()) isToday = true;
+      if (tomorrow.getTime() === startD.getTime()) isTomorrow = true;
+    } else if(endD) {
+      if (today.getTime() === endD.getTime()) isToday = true;
+      if (tomorrow.getTime() === endD.getTime()) isTomorrow = true;
+    }
+
+    if(isToday) todaysEvents.push({sido, gubun, content, note});
+    if(isTomorrow) tomorrowsEvents.push({sido, gubun, content, note});
+  }
+  
+  todaysEvents.sort((a,b) => REGIONS.indexOf(a.sido) - REGIONS.indexOf(b.sido));
+  tomorrowsEvents.sort((a,b) => REGIONS.indexOf(a.sido) - REGIONS.indexOf(b.sido));
+
+  const formatD = d => `${String(d.getFullYear()).slice(-2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+
+  const renderItems = (events) => {
+    if(events.length === 0) return `<div style="padding:16px; text-align:center; color:var(--text-dim); font-size:13px; background:rgba(255,255,255,0.02); border-radius:8px;">등록된 일정이 없습니다.</div>`;
+    
+    return `<div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 0 16px;">` + events.map((e, index) => `
+      <div style="display: flex; align-items: baseline; gap: 8px; padding: 12px 0; border-bottom: ${index === events.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)'};">
+        <div style="flex-shrink: 0; display: flex; gap: 4px; transform: translateY(1px);">
+          <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(52,211,153,0.15); color: var(--accent-emerald);">${e.sido}</span>
+          ${e.gubun ? `<span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(74,144,255,0.15); color: var(--accent-blue);">${e.gubun}</span>` : ''}
+        </div>
+        <div style="flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 1.4;">
+          ${e.content}
+          ${e.note ? `<span style="font-size: 13px; color: var(--text-secondary); margin-left: 6px; font-weight: 400;">(${e.note})</span>` : ''}
+        </div>
+      </div>
+    `).join('') + `</div>`;
+  };
+
+  return `
+    <div class="schedule-wrapper">
+      <div class="schedule-card">
+        <div class="card-title" style="margin-bottom:16px;">
+          <span class="mark" style="background:var(--accent-emerald)"></span>오늘의 일정 (${formatD(today)})
+        </div>
+        <div>${renderItems(todaysEvents)}</div>
+      </div>
+      <div class="schedule-card">
+        <div class="card-title" style="margin-bottom:16px;">
+          <span class="mark" style="background:var(--accent-blue)"></span>내일의 일정 (${formatD(tomorrow)})
+        </div>
+        <div>${renderItems(tomorrowsEvents)}</div>
+      </div>
+    </div>
+  `;
+}
+
+// 🔥 상단 차트 스위치 컨트롤 함수
+function switchTopChart(chartNum, tabMode) {
+  if(chartNum === 1) activeChart1Tab = tabMode;
+  if(chartNum === 2) activeChart2Tab = tabMode;
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const totals = {
+    all: STATS_DATA.reduce((s,d) => s+d.total_all, 0),
+    done: STATS_DATA.reduce((s,d) => s+d.total_done, 0),
+    cand: STATS_DATA.reduce((s,d) => s+d.total_cand, 0),
+  };
+  totals.rate = totals.all > 0 ? (totals.done / totals.all * 100) : 0;
+
+  // ==== 📊 차트 1 (시/도별) 데이터 계산 ====
+  let chart1Data = STATS_DATA.map(d => {
+    let rate = activeChart1Tab === 'prim' ? d.total_rate : d.conf_total_rate;
+    return { ...d, displayRate: rate };
+  }).sort((a,b) => b.displayRate - a.displayRate);
+
+  // ==== 📊 차트 2 (선거유형별) 데이터 계산 ====
+  let chart2Html = TYPE_LABELS.map((label,i) => {
+    const list = STATS_DATA.map(d => d.types.find(t => t.label === label)).filter(Boolean);
+    let all = 0, done = 0;
+    if (activeChart2Tab === 'prim') {
+      all = list.reduce((s,t) => s + t.all, 0);
+      done = list.reduce((s,t) => s + t.done, 0);
+    } else {
+      all = list.reduce((s,t) => s + t.conf_all, 0);
+      done = list.reduce((s,t) => s + t.conf_done, 0);
+    }
+    const rate = all > 0 ? (done/all*100) : 0;
+    return `<div class="type-item"><div class="type-header"><span style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${TYPE_COLORS[i]}"></div>${label}</span><span style="color:${statusColor(rate)}">${done}/${all} (${pct(rate)})</span></div><div class="progress-track"><div class="progress-fill" style="width:${rate}%;background:${TYPE_COLORS[i]}"></div></div></div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="header-left"><div class="header-mark"></div><div><h1>더불어민주당 제9회 지방선거 후보자 공천 현황판</h1><div class="subtitle">전국 시도별 실시간 공천 및 경선 진행 현황</div></div></div>
+      <div class="refresh-info"><span class="dot"></span><span>실시간 연동중</span><button class="refresh-btn" onclick="init()">↻ 새로고침</button></div>
+    </div>
+
+    ${renderSchedule()}
+
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">총 선거구</div><div class="kpi-value">${num(totals.all)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">심사완료 선거구</div><div class="kpi-value" style="color:var(--accent-emerald)">${num(totals.done)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">심사완료 후보자</div><div class="kpi-value" style="color:var(--accent-violet)">${num(totals.cand)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">미완료 선거구</div><div class="kpi-value" style="color:var(--accent-rose)">${num(totals.all - totals.done)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">종합 진행률</div><div class="kpi-value" style="color:var(--accent-blue)">${pct(totals.rate)}</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between; margin-bottom: 20px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="mark" style="background:var(--accent-blue)"></span>
+            <span>시/도별 공천 통계</span>
+          </div>
+          <div class="sub-tab-container" style="margin-bottom:0; padding-bottom:0; flex-wrap:nowrap;">
+            <button class="sub-tab-btn ${activeChart1Tab === 'prim' ? 'active' : ''}" onclick="switchTopChart(1, 'prim')" style="padding: 4px 12px; font-size:12px;">심사</button>
+            <button class="sub-tab-btn ${activeChart1Tab === 'conf' ? 'active' : ''}" onclick="switchTopChart(1, 'conf')" style="padding: 4px 12px; font-size:12px;">확정</button>
+          </div>
+        </div>
+        ${chart1Data.map(d => `
+          <div class="bar-row"><span class="bar-region">${d.region}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.max(d.displayRate, 1)}%;background:${statusColor(d.displayRate)}"></div></div><span class="bar-rate" style="color:${statusColor(d.displayRate)}">${pct(d.displayRate)}</span></div>
+        `).join('')}
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between; margin-bottom: 20px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="mark" style="background:var(--accent-violet)"></span>
+            <span>선거 유형별 공천 통계</span>
+          </div>
+          <div class="sub-tab-container" style="margin-bottom:0; padding-bottom:0; flex-wrap:nowrap;">
+            <button class="sub-tab-btn ${activeChart2Tab === 'prim' ? 'active' : ''}" onclick="switchTopChart(2, 'prim')" style="padding: 4px 12px; font-size:12px;">심사</button>
+            <button class="sub-tab-btn ${activeChart2Tab === 'conf' ? 'active' : ''}" onclick="switchTopChart(2, 'conf')" style="padding: 4px 12px; font-size:12px;">확정</button>
+          </div>
+        </div>
+        ${chart2Html}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px; border-bottom: 3px solid var(--border);">
+      <div class="region-grid">${REGIONS.map(r => `<button class="btn-region ${selectedRegion===r?'active':''}" onclick="selectRegion('${r}')">${r}</button>`).join('')}</div>
+    </div>
+
+    <div id="detail-container">
+      ${selectedRegion ? renderDetailSafe(selectedRegion) : ''}
+    </div>
+  `;
+}
+
+function renderDetailSafe(regionName) {
+  try { return renderDetail(regionName); } catch (error) {
+    console.error("렌더링 에러:", error);
+    return `<div class="card detail-panel" style="border: 2px solid var(--accent-rose);"><div class="detail-header"><div class="card-title" style="font-size:20px; margin:0;"><span class="mark" style="background:var(--accent-rose)"></span>${regionName} 상세 현황 (시스템 오류)</div><button class="detail-close" onclick="selectRegion(null)">✕ 닫기</button></div><div class="error-msg"><b style="color:var(--accent-rose); font-size:16px;">⚠️ 렌더링 중 오류가 발생했습니다.</b><br><br>[에러 내용]<br>${error.stack}</div></div>`;
+  }
+}
+
+function switchTab(type, label) {
+  if(type === 'prim') activePrimTab = label;
+  if(type === 'conf') activeConfTab = label;
+  render();
+}
+
+function renderDetail(regionName) {
+  const d = STATS_DATA.find(s => s.region === regionName) || { region: regionName, types: TYPE_LABELS.map((l,i)=>({label:l, all:0, done:0, conf_done:0, conf_all:0, color:TYPE_COLORS[i]})) };
+  const rawData = RAW_SHEETS[regionName] || [];
+  
+  let primaryList_All = getTableDataFixedCoords(rawData, 'primary');
+  let confirmedList_All = getTableDataFixedCoords(rawData, 'confirmed');
+
+  const pHeaders = [{k:'시도',l:'시도'},{k:'구분',l:'구분'},{k:'선거구',l:'선거구'},{k:'심사결과',l:'심사결과(명)'},{k:'후보자',l:'후보자 현황'},{k:'의결',l: regionName==='중앙당'?'최고위 의결(일시)':'상무위 의결(일시)'},{k:'비고',l:'비고'}];
+  const cHeaders = [{k:'시도',l:'시도'},{k:'구분',l:'구분'},{k:'선거구',l:'선거구'},{k:'후보자',l:'후보자'},{k:'생년월일',l:'생년월일'},{k:'성별',l:'성별'},{k:'대표경력',l:'대표경력'},{k:'추천사유',l:'추천사유'},{k:'의결',l:'최고위 의결'},{k:'비고',l:'비고'}];
+
+  // ==== 1. 중앙당 화면 ====
+  if (regionName === '중앙당') {
+    let mAll = 0, mDone = 0, mcAll = 0, mcDone = 0;
+    STATS_DATA.forEach(sd => {
+      let ms = sd.types.find(t => t.label === '광역단체장');
+      if(ms) { mAll += ms.all; mDone += ms.done; mcAll += ms.conf_all; mcDone += ms.conf_done; }
+    });
+    const pRate = mAll > 0 ? (mDone / mAll * 100) : 0; const cRate = mcAll > 0 ? (mcDone / mcAll * 100) : 0;
+    
+    let pList = primaryList_All.filter(r => (r['구분']||'').replace(/\s/g,'') === '단체장');
+    let cList = confirmedList_All.filter(r => (r['구분']||'').replace(/\s/g,'') === '단체장');
+
+    return `
+      <div class="card detail-panel">
+        <div class="detail-header"><div class="card-title" style="font-size:20px; margin:0;"><span class="mark" style="background:var(--accent-emerald)"></span>${regionName} 상세 현황</div><button class="detail-close" onclick="selectRegion(null)">✕ 닫기</button></div>
+        
+        <div class="section-title">📊 광역단체장 공천/경선 진행률 <span>(전국 합산 수치)</span></div>
+        <div class="detail-stats-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="detail-stat-box" style="border-color:var(--accent-blue)"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">경선 진행률 (광역단체장)</div><div style="font-size:28px;font-weight:700;color:${statusColor(pRate)}">${pct(pRate)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:8px">심사: ${mDone}/${mAll}</div></div>
+          <div class="detail-stat-box" style="border-color:var(--accent-emerald)"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">공천 확정률 (광역단체장)</div><div style="font-size:28px;font-weight:700;color:var(--accent-emerald)">${pct(cRate)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:8px">확정: ${mcDone}/${mcAll}</div></div>
+        </div>
+
+        <div class="section-title" style="margin-top:30px;">⚔️ 경선 후보자 현황</div>
+        <div class="table-wrapper"><table class="data-table">${renderTable(pList, pHeaders, "경선 현황 데이터가 없습니다.")}</table></div>
+
+        <div class="section-title" style="margin-top:40px;">🥇 공천 후보자 확정 현황</div>
+        <div class="table-wrapper"><table class="data-table">${renderTable(cList, cHeaders, "공천 확정 데이터가 없습니다.")}</table></div>
+      </div>
+    `;
+  } 
+  
+  // ==== 2. 지역당 화면 ====
+  let validTypes = d.types.filter(t => t.label !== '광역단체장'); 
+  let isExcludedRegion = ['세종', '제주'].includes(regionName);
+
+  let pTotalDone = validTypes.reduce((s,t)=>s+t.done,0); let pTotalAll = validTypes.reduce((s,t)=>s+t.all,0); let pTotalRate = pTotalAll > 0 ? (pTotalDone / pTotalAll * 100) : 0;
+  let cTotalDone = validTypes.reduce((s,t)=>s+t.conf_done,0); let cTotalAll = validTypes.reduce((s,t)=>s+t.conf_all,0); let cTotalRate = cTotalAll > 0 ? (cTotalDone / cTotalAll * 100) : 0;
+
+  let primaryList_Table = primaryList_All.filter(r => isExactMatch(r, activePrimTab));
+  let confirmedList_Table = confirmedList_All.filter(r => isExactMatch(r, activeConfTab));
+
+  if(isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(activePrimTab)) primaryList_Table = [];
+  if(isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(activeConfTab)) confirmedList_Table = [];
+
+  const buildTabs = (typeCode, activeTab) => `<div class="sub-tab-container">` + LOCAL_TABS.map(tab => `<button class="sub-tab-btn ${tab === activeTab ? 'active' : ''}" ${isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(tab) ? 'disabled' : ''} onclick="switchTab('${typeCode}', '${tab}')">${tab}</button>`).join('') + `</div>`;
+
+  return `
+    <div class="card detail-panel">
+      <div class="detail-header"><div class="card-title" style="font-size:20px; margin:0;"><span class="mark" style="background:var(--accent-emerald)"></span>${regionName} 상세 현황</div><button class="detail-close" onclick="selectRegion(null)">✕ 닫기</button></div>
+      
+      <div class="section-title">📊 경선 현황 <span>(총 선거구 대비 심사완료)</span></div>
+      <div class="detail-stats-grid">
+        <div class="detail-stat-box" style="border-color:var(--accent-blue)"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">종합 진행률</div><div style="font-size:24px;font-weight:700;color:${statusColor(pTotalRate)}">${pct(pTotalRate)}</div></div>
+        ${validTypes.map(t => isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(t.label) ? `<div class="detail-stat-box disabled"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">${t.label}</div><div style="font-size:20px;font-weight:700;color:var(--text-dim);">없음</div></div>` : `<div class="detail-stat-box"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">${t.label}</div><div style="font-size:20px;font-weight:700;color:${t.color}">${t.done}/${t.all}</div></div>`).join('')}
+      </div>
+
+      <div class="section-title">⚔️ 경선 후보자 현황</div>
+      ${buildTabs('prim', activePrimTab)}
+      <div class="table-wrapper"><table class="data-table">${renderTable(primaryList_Table, pHeaders, "해당 선거 유형의 경선 데이터가 없습니다.")}</table></div>
+
+      <div class="section-title" style="margin-top:40px;">🏆 공천 현황 <span>(전체 확정 인원 및 성별/청년 현황)</span></div>
+      <div class="detail-stats-grid">
+        <div class="detail-stat-box" style="border-color:var(--accent-emerald)"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">종합 진행율</div><div style="font-size:24px;font-weight:700;color:var(--accent-emerald)">${pct(cTotalRate)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:8px">확정: ${cTotalDone}/${cTotalAll}</div></div>
+        ${validTypes.map(t => {
+           if(isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(t.label)) return `<div class="detail-stat-box disabled"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">${t.label}</div><div style="font-size:20px;font-weight:700;color:var(--text-dim);">없음</div></div>`;
+           let cw = 0, cy = 0;
+           confirmedList_All.filter(c=> isExactMatch(c, t.label)).forEach(c=>{ if(['여','여성'].includes(c['성별'])) cw++; if(isYouth(c['생년월일'])) cy++; });
+           return `<div class="detail-stat-box"><div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">${t.label}</div><div style="font-size:20px;font-weight:700;color:${t.color}">${t.conf_done}/${t.conf_all}</div><div style="font-size:11px;color:var(--text-dim);margin-top:8px">여성 ${cw}명, 청년 ${cy}명</div></div>`;
+        }).join('')}
+      </div>
+
+      <div class="section-title">🥇 공천 후보자 확정 현황</div>
+      ${buildTabs('conf', activeConfTab)}
+      <div class="table-wrapper"><table class="data-table">${renderTable(confirmedList_Table, cHeaders, "해당 선거 유형의 공천 확정 데이터가 없습니다.")}</table></div>
+    </div>
+  `;
+}
+
+function renderTable(data, headers, emptyMsg) {
+  if (data.length === 0) return `<tr><td class="empty-msg" colspan="${headers.length}">${emptyMsg}</td></tr>`;
+  let html = `<thead><tr>${headers.map(h=>`<th>${h.l}</th>`).join('')}</tr></thead><tbody>`;
+  data.forEach(row => { 
+    html += `<tr>${headers.map(h=>{
+      let val = '-';
+      let targetKey = h.k.replace(/\s/g, '');
+      for(let k in row) { if(k.replace(/\s/g, '').includes(targetKey) || targetKey.includes(k.replace(/\s/g, ''))) { val = row[k]; break; } }
+      return `<td>${val}</td>`;
+    }).join('')}</tr>`; 
+  });
+  html += `</tbody>`;
+  return html;
+}
+
+function selectRegion(region) { 
+  selectedRegion = selectedRegion === region ? null : region; 
+  if (selectedRegion && ['세종', '제주'].includes(selectedRegion)) {
+    activePrimTab = '광역(지역구)'; activeConfTab = '광역(지역구)';
+  } else {
+    activePrimTab = '기초단체장'; activeConfTab = '기초단체장';
+  }
+  render(); 
+  if(selectedRegion) setTimeout(() => document.querySelector('.detail-panel').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+async function init() {
+  document.getElementById('app').innerHTML = `<div style="text-align:center;padding:100px;color:var(--text-dim)">데이터 동기화 중 (약 3~4초 소요)...</div>`;
+  const res = await fetchFromAPI();
+  if (res) { STATS_DATA = parseStatsData(res.stats); RAW_SHEETS = res.rawSheets; }
+  render();
+}
+init();
+</script>
+</body>
+</html>
