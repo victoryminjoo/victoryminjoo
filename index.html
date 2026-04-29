@@ -108,7 +108,7 @@ let activePrimTab = '기초단체장';
 let activeConfTab = '기초단체장';
 
 // 🔥 상단 그래프 스위치 상태 저장용 변수
-let activeChart1Tab = 'prim'; // 'prim'(심사) or 'conf'(확정)
+let activeChart1Tab = 'prim'; 
 let activeChart2Tab = 'prim';
 
 async function fetchFromAPI() {
@@ -134,11 +134,12 @@ function parseStatsData(statsJson) {
     const total_cand = getNum(row['경선_종합_후보']);
     const total_done = getNum(row['경선_종합_구']);
     const total_all = getNum(row['경선_종합_총']);
-    const total_rate = total_all > 0 ? (total_done / total_all * 100) : 0;
+    // 💡 100% 초과 방지 안전장치
+    const total_rate = total_all > 0 ? Math.min((total_done / total_all * 100), 100) : 0;
     
     const conf_total_done = getNum(row['확정_종합_구확정'] || row['확정_종합_인원']);
     const conf_total_all = getNum(row['확정_종합_총구'] || row['확정_종합_총인원']);
-    const conf_total_rate = conf_total_all > 0 ? (conf_total_done / conf_total_all * 100) : 0;
+    const conf_total_rate = conf_total_all > 0 ? Math.min((conf_total_done / conf_total_all * 100), 100) : 0;
 
     const types = [
       { label: '광역단체장', color: '#4A90FF', done: getNum(row['경선_광역장_구']), all: getNum(row['경선_광역장_총']), conf_done: getNum(row['확정_광역장_인원']), conf_all: getNum(row['확정_광역장_총']) },
@@ -233,6 +234,21 @@ function getTableDataFixedCoords(data2D, type) {
     if(hasData) result.push(obj);
   }
   return result;
+}
+
+// 🔥 정렬 함수 (오직 공천 확정 명단에만 사용됨)
+function sortCandidates(list) {
+  return list.sort((a, b) => {
+    let distA = String(a['선거구'] || '').trim();
+    let distB = String(b['선거구'] || '').trim();
+    
+    let distCompare = distA.localeCompare(distB, 'ko-KR');
+    if (distCompare !== 0) return distCompare;
+    
+    let nameA = String(a['후보자'] || '').trim();
+    let nameB = String(b['후보자'] || '').trim();
+    return nameA.localeCompare(nameB, 'ko-KR');
+  });
 }
 
 function getFilterTarget(tabLabel) {
@@ -355,7 +371,6 @@ function renderSchedule() {
   `;
 }
 
-// 🔥 상단 차트 스위치 컨트롤 함수
 function switchTopChart(chartNum, tabMode) {
   if(chartNum === 1) activeChart1Tab = tabMode;
   if(chartNum === 2) activeChart2Tab = tabMode;
@@ -371,13 +386,11 @@ function render() {
   };
   totals.rate = totals.all > 0 ? (totals.done / totals.all * 100) : 0;
 
-  // ==== 📊 차트 1 (시/도별) 데이터 계산 ====
   let chart1Data = STATS_DATA.map(d => {
     let rate = activeChart1Tab === 'prim' ? d.total_rate : d.conf_total_rate;
     return { ...d, displayRate: rate };
   }).sort((a,b) => b.displayRate - a.displayRate);
 
-  // ==== 📊 차트 2 (선거유형별) 데이터 계산 ====
   let chart2Html = TYPE_LABELS.map((label,i) => {
     const list = STATS_DATA.map(d => d.types.find(t => t.label === label)).filter(Boolean);
     let all = 0, done = 0;
@@ -482,8 +495,9 @@ function renderDetail(regionName) {
     });
     const pRate = mAll > 0 ? (mDone / mAll * 100) : 0; const cRate = mcAll > 0 ? (mcDone / mcAll * 100) : 0;
     
+    // 💡 경선(pList)은 놔두고, 공천(cList)에만 정렬!
     let pList = primaryList_All.filter(r => (r['구분']||'').replace(/\s/g,'') === '단체장');
-    let cList = confirmedList_All.filter(r => (r['구분']||'').replace(/\s/g,'') === '단체장');
+    let cList = sortCandidates(confirmedList_All.filter(r => (r['구분']||'').replace(/\s/g,'') === '단체장'));
 
     return `
       <div class="card detail-panel">
@@ -511,8 +525,9 @@ function renderDetail(regionName) {
   let pTotalDone = validTypes.reduce((s,t)=>s+t.done,0); let pTotalAll = validTypes.reduce((s,t)=>s+t.all,0); let pTotalRate = pTotalAll > 0 ? (pTotalDone / pTotalAll * 100) : 0;
   let cTotalDone = validTypes.reduce((s,t)=>s+t.conf_done,0); let cTotalAll = validTypes.reduce((s,t)=>s+t.conf_all,0); let cTotalRate = cTotalAll > 0 ? (cTotalDone / cTotalAll * 100) : 0;
 
+  // 💡 경선은 놔두고, 공천 명단에만 정렬 마법 적용!
   let primaryList_Table = primaryList_All.filter(r => isExactMatch(r, activePrimTab));
-  let confirmedList_Table = confirmedList_All.filter(r => isExactMatch(r, activeConfTab));
+  let confirmedList_Table = sortCandidates(confirmedList_All.filter(r => isExactMatch(r, activeConfTab)));
 
   if(isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(activePrimTab)) primaryList_Table = [];
   if(isExcludedRegion && DISABLED_FOR_SEJONG_JEJU.includes(activeConfTab)) confirmedList_Table = [];
